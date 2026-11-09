@@ -86,17 +86,16 @@ h2 {
 }
 
 /* =============================
-SECTIONS & TEXTES AGRANDIS
+SECTIONS & TEXTES
 ============================= */
 .section { margin-top: 25px; }
 .bold { font-weight: bold; }
 .footer { margin-top: 25px; }
 
-/* Texte plus grand et espacé pour remplir l'espace vide du milieu */
 p, ul {
-  margin: 20px 0;          /* Augmente l'espace entre chaque paragraphe */
-  line-height: 1.7;        /* Interligne plus large et aéré */
-  font-size: 17.5px;       /* Texte globalement plus grand */
+  margin: 20px 0;
+  line-height: 1.7;
+  font-size: 17.5px;
 }
 
 ul {
@@ -108,7 +107,6 @@ ul {
   text-align: left;
 }
 
-/* Position du bloc du bas inchangée */
 .bas-de-page {
   margin-top: 50px; 
 }
@@ -157,7 +155,7 @@ ZONE SIGNATURE BAS DOCUMENT
 }
 
 /* =============================
-FORMULAIRE HAUT PAGE
+FORMULAIRE HAUT PAGE & ACTIONS
 ============================= */
 .form-grid {
   display: grid;
@@ -174,140 +172,40 @@ FORMULAIRE HAUT PAGE
   font-family: Arial, sans-serif;
 }
 
-.form-grid .full {
-  grid-column: 1 / -1;
-  resize: vertical;
-  min-height: 60px;
+.button-group {
+  margin-top: 15px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
 }
-</style>
-</head>
 
-<body>
-
-<h2>Générateur Document LSHD</h2>
-
-<!-- =============================
-FORMULAIRE UTILISATEUR
-============================= -->
-<div class="form-grid">
-  <input id="name" placeholder="Nom Médecin">
-  <input id="name2" placeholder="Nom Patient">
-  <input id="dateN" placeholder="Date de Naissance">
-  <input id="adresse" placeholder="Profession">
-  <input id="date" placeholder="Date du rapport">
-  <input id="heure" placeholder="Date du début">
-  <input id="date2" placeholder="Date de fin">
-  <input id="ITT" placeholder="Nombre de jour arrêt">
-
-  <input id="fonctionSignataire" placeholder="Fonction Médecin">
-  <input id="nomSignataire" placeholder="Signataire">
-</div>
-
-<br>
-<button onclick="generate()">📄 Générer & Télécharger</button>
-
-<!-- =============================
-DOCUMENT FINAL
-============================= -->
-<div id="doc">
-
-  <div class="header">
-    <img src="banniere.png">
-  </div>
-
-  <div class="content">
-
-    <!-- HAUT DE PAGE -->
-    <div>
-      <h1>CERTIFICAT MÉDICAL D’ARRÊT DE TRAVAIL</h1>
-   
-      <p class="bold">Identification du patient :</p>
-      <ul> 
-        <li>Nom : <span id="doc_name2" class="bold"></span></li> 
-        <li>Né(e) le : <span id="doc_dateN" class="bold"></span></li> 
-        <li>Profession / Fonction : <span id="doc_adresse" class="bold"></span></li> 
-      </ul>
-
-      <p class="bold">Je soussigné, Docteur <span id="doc_name"></span>, certifie avoir examiné ce jour le patient.</p> 
-
-      <p>À la suite d’une évaluation médicale approfondie de ses aptitudes, je conclus que l'état de santé du patient nécessite l'observation d’une période de repos complet, rendant temporairement impossible l'exercice de son activité professionnelle.</p> 
-
-      <p><u>Date de début :</u> Le <span id="doc_heure"></span></p>
-      <p><u>Date de reprise :</u> Le <span id="doc_date2"></span></p>
-
-      <div class="footer"> 
-        <p>L'état de santé de l'intéressé(e) nécessite ainsi une interruption de son activité professionnelle pour une durée de <span id="doc_ITT" class="bold"></span> jours.</p> 
-      </div> 
-    </div>
-
-    <!-- BAS DE PAGE -->
-    <div class="bas-de-page">
-      <hr>
-      <p>Fait au Centre Hospitalier Mount Zonah en date du : <span id="doc_d2"></span></p>
-
-      <div class="signature-block">
-        <div class="signataire">
-          <p>Fonction : <span id="doc_fonction" class="bold"></span></p>
-          <p>Signataire : <span id="doc_nom" class="bold"></span></p>
-        </div>
-
-        <div class="signature-box">
-          <img src="cachet2.png" class="logo-cachet"> 
-          <div id="signatureText" class="signature-hand"></div>
-        </div>
-      </div>
-    </div>
-
-  </div> 
-</div> 
-
-<script>
-/* =============================
-FONCTION GENERATION DOCUMENT
-============================= */
-function generate() {
-  
-  let name = document.getElementById("name").value;
-  let name2 = document.getElementById("name2").value;
-  let dateN = document.getElementById("dateN").value;
-  let adresse = document.getElementById("adresse").value;
-  let date = document.getElementById("date").value;
-  let heure = document.getElementById("heure").value;
-  let date2 = document.getElementById("date2").value;
-  let ITT = document.getElementById("ITT").value;
-  let fonction = document.getElementById("fonctionSignataire").value;
-  let nom = document.getElementById("nomSignataire").value;
-
-  document.getElementById("doc_name").innerText = name;
-  document.getElementById("doc_date2").innerText = date2;
-  document.getElementById("doc_heure").innerText = heure;
-  document.getElementById("doc_name2").innerText = name2;
-  document.getElementById("doc_dateN").innerText = dateN;
-  document.getElementById("doc_adresse").innerText = adresse;
-  document.getElementById("doc_ITT").innerText = ITT;
-  
-  document.getElementById("doc_d2").innerText = date; 
-  document.getElementById("doc_fonction").innerText = fonction || "";
-  document.getElementById("doc_nom").innerText = nom || "";
-  document.getElementById("signatureText").innerText = nom || "";
-
-  document.fonts.ready.then(() => {
-    setTimeout(() => {
-      html2canvas(document.getElementById("doc"), {
-        scale: 3,
-        useCORS: true,
-        width: 794,
-        height: 1123
-      }).then(canvas => {
-        let link = document.createElement("a");
-        link.download = "arret-de-travail.png";
-        link.href = canvas.toDataURL("image/png");
-        link.click();
-      });
-    }, 300);
-  });
+button {
+  padding: 10px 18px;
+  cursor: pointer;
+  font-weight: bold;
+  border-radius: 6px;
+  border: 1px solid #aaa;
+  background: #fff;
+  transition: 0.2s;
 }
-</script>
 
-</body>
-</html>
+button:hover {
+  background: #eee;
+}
+
+.url-box {
+  margin-top: 15px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.url-box input {
+  flex: 1;
+  padding: 8px;
+  font-family: Arial, sans-serif;
+  border-radius: 4px;
+  border: 1px solid #ccc;
