@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+
+<!-- Police signature manuscrite -->
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+<!-- Librairie capture écran -->
+<script src="https://cdn.jsdelivr.net/npm/html2canvas"></script>
+
+<style>
+/* =============================
+STYLE GLOBAL PAGE
+============================= */
+body {
+  font-family: Arial, sans-serif;
+  background: #ddd;
+  text-align: center;
+}
+
+/* =============================
+FORMAT DOCUMENT A4
+============================= */
+#doc {
+  width: 794px;
+  height: 1123px;
+  margin: 40px auto;
+  background: #f4efe7;
+  position: relative;
+  overflow: hidden;
+  display: flex;           
+  flex-direction: column;  
+}
+
+/* =============================
+FILIGRANE FOND DOCUMENT
+============================= */
+#doc::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 80%;
+  height: 80%;
+  background: url('filigrane.png') no-repeat center;
+  background-size: contain;
+  transform: translate(-50%, -50%);
+  opacity: 0.08;
+  pointer-events: none;
+}
+
+/* =============================
+BANNIERE HAUT PAGE
+============================= */
+.header img {
+  width: auto;
+  max-width: 100%; 
+  display: block;
+  margin: 0; 
+  margin-top: 20px;
+}
+
+/* =============================
+TITRES
+============================= */
+h1 {
+  text-align: center;
+  margin-bottom: 15px;
+  margin-top: 15px;
+  font-weight: bold; 
+  font-family: "Times New Roman", Times, serif; 
+  text-decoration: underline; 
+  font-size: 22px;
+}
+
+h2 {
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 15px;
+  border: 1px solid black; 
+  padding: 8px 12px; 
+  font-family: Consolas, monospace; 
+  font-size: 15px; 
+  font-weight: normal; 
+  width: fit-content; 
+  margin-left: auto; 
+  margin-right: auto; 
+}
+
+/* =============================
+SECTIONS & TEXTES
+============================= */
+.section { margin-top: 15px; }
+.bold { font-weight: bold; }
+.footer { margin-top: 15px; }
+
+p, ul {
+  margin: 6px 0;
+  line-height: 1.35;
+  font-size: 14.5px;
+}
+
+.content {
+  padding: 20px 60px 30px 60px; 
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+/* =============================
+ZONE SIGNATURE BAS DOCUMENT
+============================= */
+.signature-block {
+  margin-top: auto;        
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+}
+
+.signataire p {
+  margin: 4px 0;
+}
+
+.signature-box {
+  position: relative;
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 250px;
+  height: 120px;
+}
+
+.logo-cachet {
+  position: absolute;
+  width: 130px;
+  opacity: 0.15;
+  z-index: 1;
+}
+
+.signature-hand {
+  position: relative;
+  z-index: 2;
+  font-family: 'Great Vibes', cursive;
+  font-size: 54px;
+  transform: rotate(-6deg);
+  white-space: nowrap;
+  color: #000;
+}
+
+/* =============================
+FORMULAIRE HAUT PAGE
+============================= */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  max-width: 600px;
+  margin: auto;
+}
+
+.form-grid input, .form-grid textarea {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+.form-grid .full {
+  grid-column: 1 / -1;
+  resize: vertical;
+  min-height: 60px;
+}
+</style>
+</head>
+
+<body>
+
+<h2>Générateur Document LSHD</h2>
+
+<!-- =============================
+FORMULAIRE UTILISATEUR
+============================= -->
+<div class="form-grid">
+  <input id="name" placeholder="Nom Médecin">
+  <input id="name2" placeholder="Nom Patient">
+  <input id="dateN" placeholder="Date de Naissance">
+  <input id="adresse" placeholder="Adresse">
+  <input id="date" placeholder="Date du rapport">
+  <input id="heure" placeholder="Heure du rapport">
+  <input id="date2" placeholder="Date de l'agression">
+  <input id="ITT" placeholder="Nombre de jour ITT">
+
+  <textarea id="plaintes" placeholder="Texte décrivant la plainte du patient" class="full"></textarea>
+  <textarea id="examen" placeholder="Constatation des blessures" class="full"></textarea>
+  <textarea id="conclusion" placeholder="Conclusion" class="full"></textarea>
+
+  <input id="fonctionSignataire" placeholder="Fonction">
+  <input id="nomSignataire" placeholder="Signataire">
+</div>
+
+<br>
+<button onclick="generate()">📄 Générer & Télécharger</button>
+
+<!-- =============================
+DOCUMENT FINAL
+============================= -->
+<div id="doc">
+
+  <div class="header">
+    <img src="banniere.png">
+  </div>
+
+  <div class="content">
+
+    <h1>CERTIFICAT POUR COUPS ET BLESSURES VOLONTAIRES</h1>
+    <h2>RAPPORT DESTINÉ EXCLUSIVEMENT À L'AUTORITÉ JUDICIAIRE</h2>
+    <hr>
+
+    <p class="bold">Je soussigné, Docteur <span id="doc_name"></span>,</p> 
+    <p> Certifie avoir examiné le : <span id="doc_date" class="bold"></span> à <span id="doc_heure" class="bold"></span> heures à l'hôpital </p> 
+    
+    <p> Une personne déclarant se nommer :</p>
+    <ul> 
+      <li>Nom : <span id="doc_name2" class="bold"></span> ;</li> 
+      <li>Né(e) le : <span id="doc_dateN" class="bold"></span> ;</li> 
+      <li>Demeurant : <span id="doc_adresse" class="bold"></span> ;</li> 
+    </ul> 
+
+    <p>Déclare avoir été victime d’une agression le <span id="doc_date2" class="bold"></span></p> 
+
+    <p><u>Se plaignant de :</u></p>
+    <p><span id="doc_plaintes"></span></p>
+
+    <p><u>À l’examen, il a été constaté :</u></p>
+    <p><span id="doc_examen"></span></p>
+
+    <p><u>Conclusion :</u></p>
+    <p><span id="doc_conclusion"></span></p>
+
+    <div class="footer"> 
+      <p>Les lésions constatées ce jour, justifient une incapacité totale de travail de <span id="doc_ITT" class="bold"></span> jours à dater des faits, sous réserve de complications.</p> 
+    </div> 
+
+    <hr>
+
+    <p>Fait au Centre Hospitalier Mount Zonah en date du : <span id="doc_d2"></span></p>
+
+    <div class="signature-block">
+      
+      <div class="signataire">
+        <p>Fonction : <span id="doc_fonction" class="bold"></span></p>
+        <p>Signataire : <span id="doc_nom" class="bold"></span></p>
+      </div>
+
+      <div class="signature-box">
+        <img src="cachet2.png" class="logo-cachet"> 
+        <div id="signatureText" class="signature-hand"></div>
+      </div>
+
+    </div>
+
+  </div> 
+</div> 
+
+<script>
+/* =============================
+FONCTION GENERATION DOCUMENT
+============================= */
+function generate() {
+  
+  let name = document.getElementById("name").value;
+  let name2 = document.getElementById("name2").value;
+  let dateN = document.getElementById("dateN").value;
+  let adresse = document.getElementById("adresse").value;
+  let date = document.getElementById("date").value;
+  let heure = document.getElementById("heure").value;
+  let date2 = document.getElementById("date2").value;
+  let ITT = document.getElementById("ITT").value;
+  let plaintes = document.getElementById("plaintes").value;
+  let examen = document.getElementById("examen").value;
+  let conclusion = document.getElementById("conclusion").value;
+  let fonction = document.getElementById("fonctionSignataire").value;
+  let nom = document.getElementById("nomSignataire").value;
+
+  document.getElementById("doc_name").innerText = name;
+  document.getElementById("doc_date").innerText = date;
+  document.getElementById("doc_heure").innerText = heure;
+  document.getElementById("doc_name2").innerText = name2;
+  document.getElementById("doc_dateN").innerText = dateN;
+  document.getElementById("doc_adresse").innerText = adresse;
+  document.getElementById("doc_date2").innerText = date2;
+  document.getElementById("doc_plaintes").innerText = plaintes;
+  document.getElementById("doc_examen").innerText = examen;
+  document.getElementById("doc_conclusion").innerText = conclusion;
+  document.getElementById("doc_ITT").innerText = ITT;
+  
+  document.getElementById("doc_d2").innerText = date; 
+  document.getElementById("doc_fonction").innerText = fonction || "";
+  document.getElementById("doc_nom").innerText = nom || "";
+  document.getElementById("signatureText").innerText = nom || "";
+
+  document.fonts.ready.then(() => {
+    setTimeout(() => {
+      html2canvas(document.getElementById("doc"), {
+        scale: 3,
+        useCORS: true,
+        width: 794,
+        height: 1123
+      }).then(canvas => {
+        let link = document.createElement("a");
+        link.download = "rapport-medical.png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      });
+    }, 300);
+  });
+}
+</script>
+
+</body>
+</html>
