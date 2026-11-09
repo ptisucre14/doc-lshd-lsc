@@ -28,8 +28,8 @@ FORMAT DOCUMENT A4
   background: #f4efe7;
   position: relative;
   overflow: hidden;
-  display: flex;           
-  flex-direction: column;  
+  display: flex;            
+  flex-direction: column;   
 }
 
 /* =============================
@@ -151,7 +151,7 @@ ZONE SIGNATURE BAS DOCUMENT
 }
 
 /* =============================
-FORMULAIRE HAUT PAGE
+FORMULAIRE HAUT PAGE & ACTIONS
 ============================= */
 .form-grid {
   display: grid;
@@ -173,12 +173,51 @@ FORMULAIRE HAUT PAGE
   resize: vertical;
   min-height: 60px;
 }
+
+.button-group {
+  margin-top: 15px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+button {
+  padding: 10px 18px;
+  cursor: pointer;
+  font-weight: bold;
+  border-radius: 6px;
+  border: 1px solid #aaa;
+  background: #fff;
+  transition: 0.2s;
+}
+
+button:hover {
+  background: #eee;
+}
+
+.url-box {
+  margin-top: 15px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.url-box input {
+  flex: 1;
+  padding: 8px;
+  font-family: Arial, sans-serif;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
 </style>
 </head>
 
 <body>
 
-<h2>Générateur Document LSHD</h2>
+<h2>Générateur Document LSHD - Certificat CBV</h2>
 
 <!-- =============================
 FORMULAIRE UTILISATEUR
@@ -201,8 +240,15 @@ FORMULAIRE UTILISATEUR
   <input id="nomSignataire" placeholder="Signataire">
 </div>
 
-<br>
-<button onclick="generate()">📄 Générer & Télécharger</button>
+<div class="button-group">
+  <button onclick="generate()">📄 Générer le Document (Téléchargement + Lien)</button>
+</div>
+
+<!-- CHAMP DE LIEN HÉBERGÉ PERMANENT -->
+<div class="url-box">
+  <input type="text" id="generatedUrl" placeholder="Le lien permanent ImgBB apparaîtra ici..." readonly>
+  <button onclick="copyUrl()">📋 Copier le lien</button>
+</div>
 
 <!-- =============================
 DOCUMENT FINAL
@@ -210,7 +256,7 @@ DOCUMENT FINAL
 <div id="doc">
 
   <div class="header">
-    <img src="banniere.png">
+    <img src="banniere.png" alt="Bannière">
   </div>
 
   <div class="content">
@@ -220,9 +266,9 @@ DOCUMENT FINAL
     <hr>
 
     <p class="bold">Je soussigné, Docteur <span id="doc_name"></span>,</p> 
-    <p> Certifie avoir examiné le : <span id="doc_date" class="bold"></span> à <span id="doc_heure" class="bold"></span> heures à l'hôpital </p> 
+    <p>Certifie avoir examiné le : <span id="doc_date" class="bold"></span> à <span id="doc_heure" class="bold"></span> heures à l'hôpital</p> 
     
-    <p> Une personne déclarant se nommer :</p>
+    <p>Une personne déclarant se nommer :</p>
     <ul> 
       <li>Nom : <span id="doc_name2" class="bold"></span> ;</li> 
       <li>Né(e) le : <span id="doc_dateN" class="bold"></span> ;</li> 
@@ -256,7 +302,7 @@ DOCUMENT FINAL
       </div>
 
       <div class="signature-box">
-        <img src="cachet2.png" class="logo-cachet"> 
+        <img src="cachet2.png" class="logo-cachet" alt="Cachet"> 
         <div id="signatureText" class="signature-hand"></div>
       </div>
 
@@ -266,11 +312,12 @@ DOCUMENT FINAL
 </div> 
 
 <script>
-/* =============================
-FONCTION GENERATION DOCUMENT
-============================= */
+// CLÉ API IMGBB
+const IMGBB_API_KEY = "520f6d6d06cdaa3ddf69a971e003cc59";
+
 function generate() {
   
+  // 1. Récupération des valeurs des inputs & textareas
   let name = document.getElementById("name").value;
   let name2 = document.getElementById("name2").value;
   let dateN = document.getElementById("dateN").value;
@@ -285,6 +332,7 @@ function generate() {
   let fonction = document.getElementById("fonctionSignataire").value;
   let nom = document.getElementById("nomSignataire").value;
 
+  // 2. Injection dans le document HTML
   document.getElementById("doc_name").innerText = name;
   document.getElementById("doc_date").innerText = date;
   document.getElementById("doc_heure").innerText = heure;
@@ -302,6 +350,9 @@ function generate() {
   document.getElementById("doc_nom").innerText = nom || "";
   document.getElementById("signatureText").innerText = nom || "";
 
+  document.getElementById("generatedUrl").value = "Hébergement du lien en cours...";
+
+  // 3. Génération Image & Téléchargement + Upload ImgBB
   document.fonts.ready.then(() => {
     setTimeout(() => {
       html2canvas(document.getElementById("doc"), {
@@ -310,13 +361,48 @@ function generate() {
         width: 794,
         height: 1123
       }).then(canvas => {
+
+        // A. Téléchargement automatique PNG
         let link = document.createElement("a");
-        link.download = "rapport-medical.png";
+        link.download = "certificat-cbv.png";
         link.href = canvas.toDataURL("image/png");
         link.click();
+
+        // B. Upload vers ImgBB
+        let base64Image = canvas.toDataURL("image/png").split(',')[1];
+        let formData = new FormData();
+        formData.append("image", base64Image);
+
+        fetch("https://api.imgbb.com/1/upload?key=" + IMGBB_API_KEY, {
+          method: "POST",
+          body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            document.getElementById("generatedUrl").value = data.data.url;
+          } else {
+            document.getElementById("generatedUrl").value = "Erreur : Clé API ImgBB invalide";
+            console.error(data);
+          }
+        })
+        .catch(err => {
+          document.getElementById("generatedUrl").value = "Erreur de connexion ImgBB";
+          console.error(err);
+        });
+
       });
     }, 300);
   });
+}
+
+function copyUrl() {
+  let urlInput = document.getElementById("generatedUrl");
+  if (urlInput.value && !urlInput.value.startsWith("Erreur") && !urlInput.value.startsWith("Hébergement")) {
+    urlInput.select();
+    navigator.clipboard.writeText(urlInput.value);
+    alert("Lien ImgBB copié dans le presse-papier !");
+  }
 }
 </script>
 
