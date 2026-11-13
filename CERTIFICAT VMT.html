@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Générateur LSHD - Certificat d'Aptitude</title>
+
+<!-- Police signature manuscrite -->
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+<!-- Librairie capture écran -->
+<script src="https://cdn.jsdelivr.net/npm/html2canvas"></script>
+
+<style>
+/* =============================
+STYLE GLOBAL PAGE
+============================= */
+body {
+  font-family: Arial, sans-serif;
+  background: #ddd;
+  text-align: center;
+  margin: 20px;
+}
+
+/* =============================
+FORMAT DOCUMENT A4
+============================= */
+#doc {
+  width: 794px;
+  height: 1123px;
+  margin: 30px auto;
+  background: #f4efe7;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* =============================
+FILIGRANE FOND DOCUMENT
+============================= */
+#doc::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 80%;
+  height: 80%;
+  background: url('filigrane.png') no-repeat center;
+  background-size: contain;
+  transform: translate(-50%, -50%);
+  opacity: 0.08;
+  pointer-events: none;
+}
+
+/* =============================
+BANNIERE HAUT PAGE
+============================= */
+.header img {
+  width: auto;
+  max-width: 100%;
+  display: block;
+  margin: 15px 0 0 0;
+}
+
+/* =============================
+TITRES
+============================= */
+h1 {
+  text-align: center;
+  margin: 15px 0 20px 0;
+  font-weight: bold;
+  font-family: "Times New Roman", Times, serif;
+  text-decoration: underline;
+  font-size: 24px;
+}
+
+h2 {
+  text-align: center;
+  margin: 0 auto 20px auto;
+  border: 1px solid black;
+  padding: 8px 12px;
+  font-family: Consolas, monospace;
+  font-size: 14px;
+  font-weight: normal;
+  width: fit-content;
+}
+
+/* =============================
+CONTENU & TEXTES DOCUMENT
+============================= */
+.content {
+  padding: 15px 60px 30px 60px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 1;
+}
+
+.bold { font-weight: bold; }
+
+.content p, .content ul {
+  margin: 12px 0;
+  line-height: 1.5;
+  font-size: 15.5px;
+}
+
+.content ul {
+  padding-left: 30px;
+}
+
+.content hr {
+  border: none;
+  border-top: 1px solid #888;
+  margin: 14px 0;
+}
+
+/* =============================
+ENCART CONCLUSION
+============================= */
+.conclusion-box {
+  border: 2px solid #000;
+  margin: 16px 0;
+  background-color: transparent;
+}
+
+.conclusion-header {
+  background-color: #a6a6a6;
+  color: #000;
+  font-weight: bold;
+  text-align: center;
+  padding: 7px;
+  font-size: 15px;
+  border-bottom: 2px solid #000;
+  letter-spacing: 0.5px;
+}
+
+.conclusion-body {
+  padding: 12px 18px;
+  color: #000;
+  text-align: left;
+  background-color: transparent;
+}
+
+.conclusion-body p {
+  margin: 8px 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.verdict-wrapper {
+  text-align: center;
+  margin: 10px 0;
+}
+
+.verdict-badge {
+  display: inline-block;
+  background-color: transparent;
+  color: #000;
+  font-weight: bold;
+  font-size: 32px;
+  padding: 2px 20px;
+}
+
+/* =============================
+ENCADRÉ LÉGAL & BAS DE PAGE
+============================= */
+.footer {
+  margin-top: 16px;
+}
+
+.footer h2 {
+  margin: 0 auto;
+  font-size: 12.5px;
+  line-height: 1.4;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.bas-de-page {
+  margin-top: 10px;
+}
+
+.bas-de-page p {
+  font-size: 14.5px;
+  margin: 8px 0;
+}
+
+/* =============================
+ZONE SIGNATURE BAS DOCUMENT
+============================= */
+.signature-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+  margin-top: 10px;
+}
+
+.signataire p {
+  margin: 3px 0;
+  font-size: 15px;
+}
+
+.signature-box {
+  position: relative;
+  margin-top: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 250px;
+  height: 110px;
+}
+
+.logo-cachet {
+  position: absolute;
+  width: 125px;
+  opacity: 0.15;
+  z-index: 1;
+}
+
+.signature-hand {
+  position: relative;
+  z-index: 2;
+  font-family: 'Great Vibes', cursive;
+  font-size: 52px;
+  transform: rotate(-6deg);
+  white-space: nowrap;
+  color: #000;
+}
+
+/* =============================
+FORMULAIRE & ACTIONS HAUT PAGE
+============================= */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  max-width: 600px;
+  margin: auto;
+}
+
+.form-grid input,
+.form-grid textarea,
+.form-grid select {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+  background-color: #fff;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+}
+
+.button-group {
+  margin-top: 15px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+button {
+  padding: 10px 18px;
+  cursor: pointer;
+  font-weight: bold;
+  border-radius: 6px;
+  border: 1px solid #aaa;
+  background: #fff;
+  transition: 0.2s;
+}
+
+button:hover {
+  background: #eee;
+}
+
+.url-box {
+  margin: 15px auto 0 auto;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  max-width: 600px;
+}
+
+.url-box input {
+  flex: 1;
+  padding: 8px;
+  font-family: Arial, sans-serif;
+  border-radius: 4px;
+  border: 1px solid #aaa;
+  background: #fff;
+}
+</style>
+</head>
+
+<body>
+
+<h2>Générateur Document LSHD</h2>
+
+<!-- =============================
+FORMULAIRE UTILISATEUR
+============================= -->
+<div class="form-grid">
+  <input id="name" placeholder="Nom Médecin">
+  <input id="name2" placeholder="Nom Patient">
+  <input id="dateN" placeholder="Date de Naissance">
+  
+  <select id="adresse">
+    <option value="" disabled selected>Statut du demandeur</option>
+    <option value="Le patient lui-même">Le patient lui-même</option>
+    <option value="Représentant légal / Tuteur">Représentant légal / Tuteur</option>
+    <option value="Autorité judiciaire / LSPD">Autorité judiciaire / LSPD</option>
+    <option value="Ayant droit">Ayant droit</option>
+  </select>
+
+  <select id="aptitude" onchange="updateAptitude()">
+    <option value="N/A" selected>Résultat : N/A</option>
+    <option value="APTE">APTE</option>
+    <option value="INAPTE">INAPTE</option>
+  </select>
+
+  <input id="date" placeholder="Date du rapport">
+  <input id="fonctionSignataire" placeholder="Fonction Médecin">
+  <input id="nomSignataire" placeholder="Signataire">
+</div>
+
+<div class="button-group">
+  <button onclick="generate()">📄 Générer le Document (Téléchargement + Lien)</button>
+</div>
+
+<!-- CHAMP DE LIEN HÉBERGÉ PERMANENT -->
+<div class="url-box">
+  <input type="text" id="generatedUrl" placeholder="Le lien permanent ImgBB apparaîtra ici..." readonly>
+  <button onclick="copyUrl()">📋 Copier le lien</button>
+</div>
+
+<!-- =============================
+DOCUMENT FINAL
+============================= -->
+<div id="doc">
+
+  <div class="header">
+    <img src="banniere.png" alt="Bannière Mount Zonah">
+  </div>
+
+  <div class="content">
+
+    <!-- HAUT DE PAGE -->
+    <div>
+      <h1>CERTIFICAT MÉDICAL D’APTITUDE AU TRAVAIL</h1>
+   
+      <p class="bold">Identification du patient :</p>
+      <ul>
+        <li>Nom : <span id="doc_name2" class="bold"></span></li>
+        <li>Né(e) le : <span id="doc_dateN" class="bold"></span></li>
+        <li>Statut du demandeur : <span id="doc_adresse" class="bold"></span></li>
+      </ul>
+
+      <hr>
+
+      <p>Je soussigné, Docteur <span id="doc_name" class="bold"></span>, certifie avoir procédé à l’évaluation médicale de la personne désignée sur le présent document et atteste que celle-ci satisfait aux exigences médicales nécessaires à l’exercice des fonctions qui lui sont attribuées.</p>
+
+      <p>Le présent certificat ne fait état d’aucun diagnostic, traitement, antécédent médical ou résultat d’examen. Seule la conclusion relative à l’aptitude professionnelle est communiquée.</p>
+
+      <div class="conclusion-box">
+        <div class="conclusion-header">CONCLUSION</div>
+        <div class="conclusion-body">
+          <p>À l'issue de l'évaluation médicale réalisée, le/la patient(e) est déclaré(e) :</p>
+          
+          <div class="verdict-wrapper">
+            <span id="doc_aptitude" class="verdict-badge">N/A</span>
+          </div>
+
+          <p>Et ceci sera valable pour l'ensemble de l'exercice des fonctions qui lui seront attribuées.</p>
+          <p>Ce document atteste une validité d'une durée de 2 mois, passé ce délai, toute activité répertoriée avec ce présent document ne sera pas valable et pourra être soumise à une poursuite judiciaire et/ou licenciement par les tiers concernés.</p>
+        </div>
+      </div>
+
+      <div class="footer">
+        <h2>Ce document a été créé par le Conseil d'Administration n°01. Tout le contenu du document est considéré comme les lois et l’application de celle-ci.<br>
+        Cordialement, la Direction du LSHD, les Juridiques et Médicaux et les propres organes internes du LSHD avec les pouvoirs qui y sont conférés.</h2>
+      </div>
+    </div>
+
+    <!-- BAS DE PAGE -->
+    <div class="bas-de-page">
+      <hr>
+      <p>Ce certificat a été établi dans le but d'être utilisé et d'avoir une valeur légale sur la demande de l'intéressé(e) étant remis en personne au Centre Hospitalier Mount Zonah en date du : <span id="doc_d2" class="bold"></span></p>
+
+      <div class="signature-block">
+        <div class="signataire">
+          <p>Fonction : <span id="doc_fonction" class="bold"></span></p>
+          <p>Signataire : <span id="doc_nom" class="bold"></span></p>
+        </div>
+
+        <div class="signature-box">
+          <img src="cachet2.png" class="logo-cachet" alt="Cachet LSHD">
+          <div id="signatureText" class="signature-hand"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// CLÉ API IMGBB
+const IMGBB_API_KEY = "520f6d6d06cdaa3ddf69a971e003cc59";
+
+function updateAptitude() {
+  let aptitude = document.getElementById("aptitude").value;
+  let docAptitude = document.getElementById("doc_aptitude");
+  
+  docAptitude.innerText = aptitude;
+
+  if (aptitude === "APTE") {
+    docAptitude.style.color = "#15803d"; // Vert
+  } else if (aptitude === "INAPTE") {
+    docAptitude.style.color = "#dc2626"; // Rouge
+  } else {
+    docAptitude.style.color = "#000000"; // Noir pour N/A
+  }
+}
+
+function generate() {
+  // 1. Récupération des valeurs des inputs
+  let name = document.getElementById("name").value;
+  let name2 = document.getElementById("name2").value;
+  let dateN = document.getElementById("dateN").value;
+  let adresse = document.getElementById("adresse").value;
+  let date = document.getElementById("date").value;
+  let fonction = document.getElementById("fonctionSignataire").value;
+  let nom = document.getElementById("nomSignataire").value;
+
+  // 2. Injection dans le document HTML
+  document.getElementById("doc_name").innerText = name;
+  document.getElementById("doc_name2").innerText = name2;
+  document.getElementById("doc_dateN").innerText = dateN;
+  document.getElementById("doc_adresse").innerText = adresse;
+  
+  document.getElementById("doc_d2").innerText = date;
+  document.getElementById("doc_fonction").innerText = fonction || "";
+  document.getElementById("doc_nom").innerText = nom || "";
+  document.getElementById("signatureText").innerText = nom || "";
+
+  updateAptitude();
+  document.getElementById("generatedUrl").value = "Hébergement du lien en cours...";
+
+  // 3. Génération Image & Téléchargement + Hébergement
+  document.fonts.ready.then(() => {
+    setTimeout(() => {
+      html2canvas(document.getElementById("doc"), {
+        scale: 3,
+        useCORS: true,
+        width: 794,
+        height: 1123
+      }).then(canvas => {
+
+        // A. Téléchargement automatique de l'image (PNG)
+        let link = document.createElement("a");
+        link.download = "certificat-aptitude.png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+
+        // B. Upload vers ImgBB pour obtenir le lien d'image permanent
+        let base64Image = canvas.toDataURL("image/png").split(',')[1];
+        let formData = new FormData();
+        formData.append("image", base64Image);
+
+        fetch("https://api.imgbb.com/1/upload?key=" + IMGBB_API_KEY, {
+          method: "POST",
+          body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            document.getElementById("generatedUrl").value = data.data.url;
+          } else {
+            document.getElementById("generatedUrl").value = "Erreur : Clé API ImgBB invalide";
+            console.error(data);
+          }
+        })
+        .catch(err => {
+          document.getElementById("generatedUrl").value = "Erreur de connexion ImgBB";
+          console.error(err);
+        });
+
+      });
+    }, 300);
+  });
+}
+
+function copyUrl() {
+  let urlInput = document.getElementById("generatedUrl");
+  if (urlInput.value && !urlInput.value.startsWith("Erreur") && !urlInput.value.startsWith("Hébergement")) {
+    urlInput.select();
+    navigator.clipboard.writeText(urlInput.value);
+    alert("Lien ImgBB copié dans le presse-papier !");
+  }
+}
+</script>
+
+</body>
+</html>
