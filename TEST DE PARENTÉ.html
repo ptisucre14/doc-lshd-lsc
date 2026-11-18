@@ -407,8 +407,8 @@ DOCUMENT FINAL
 
     <!-- HAUT & CORPS DU RAPPORT ADN -->
     <div>
-      <h1>RAPPORT D’ANALYSE ADN — TEST DE PARENTÉ</h1>
-      <div class="subtitle">Service de Génétique et de Biologie Moléculaire — LSHD</div>
+      <h1>RAPPORT D’ANALYSE ADN : TEST DE PARENTÉ</h1>
+      <div class="subtitle">Service de Génétique et de Biologie Moléculaire du LSHD</div>
 
       <!-- ENCADRE DATE & SUJETS -->
       <table class="info-table">
@@ -529,7 +529,7 @@ function generate() {
   let nom = document.getElementById("nomSignataire").value;
 
   // 2. Injection des informations générales
-  document.getElementById("doc_date_heure").innerText = heure ? (date + " — " + heure) : date;
+  document.getElementById("doc_date_heure").innerText = heure ? (date + "à" + heure) : date;
   document.getElementById("doc_prelevement").innerText = prelevement;
 
   document.getElementById("doc_sujetA_nom").innerText = sujetA_nom;
